@@ -1,5 +1,5 @@
 
-import express, { RequestHandler, } from 'express';
+import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
@@ -26,8 +26,11 @@ class App {
   }
 
   private routerSetup() {
-    this.app.use('/', indexRouter);
-    this.app.use('/users', usersRouter);
+    const apiRouter = express.Router();
+    this.app.use('/api', apiRouter)
+
+    apiRouter.use('/', indexRouter);
+    apiRouter.use('/users', usersRouter);
   }
 
 }

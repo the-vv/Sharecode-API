@@ -8,5 +8,7 @@
     "src/**/*.ts",
     "bin/www.ts"
   ],
-  "exclude": []
+  "exclude": [
+    "etc"
+  ]
 }

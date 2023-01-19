@@ -2,7 +2,7 @@
  * Module dependencies.
  */
 
-import 'module-alias/register';
+// import 'module-alias/register';
 import { config } from 'dotenv';
 config();
 

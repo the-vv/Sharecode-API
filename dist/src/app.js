@@ -12,8 +12,9 @@ const users_1 = __importDefault(require("./routes/users"));
 class App {
     constructor() {
         this.app = (0, express_1.default)();
-        this.config();
-        this.routerSetup();
+        // this.config();
+        // this.routerSetup();
+        // console.log('test123445')
     }
     config() {
         this.app.use((0, morgan_1.default)('dev'));
@@ -23,8 +24,11 @@ class App {
         this.app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
     }
     routerSetup() {
-        this.app.use('/', index_1.default);
-        this.app.use('/users', users_1.default);
+        const apiRouter = express_1.default.Router();
+        this.app.use('/api', apiRouter);
+        apiRouter.use('/', index_1.default);
+        apiRouter.use('/users', users_1.default);
+        console.log('test123445');
     }
 }
 exports.default = new App().app;
