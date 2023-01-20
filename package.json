@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "nodemon",
     "start": "node -r module-alias/register ./dist/bin/www",
-    "build": "node etc/build"
+    "build": "node etc/build",
+    "build-linux": "rm -rf dist && npm run tsc -- -p ./tsconfig.build.json --pretty && cp -R src/public dist/src/public",
+    "tsc": "tsc"
   },
   "nodemonConfig": {
     "watch": [
