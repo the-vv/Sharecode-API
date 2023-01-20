@@ -6,7 +6,7 @@
     "dev": "nodemon",
     "start": "node -r module-alias/register ./dist/bin/www",
     "build": "node etc/build",
-    "build-linux": "export NODE_ENV=production && rm -rf dist && npm run tsc -- -p ./tsconfig.build.json --pretty && cp -R src/public dist/src/public",
+    "build-linux": "bash etc/build.sh",
     "tsc": "tsc"
   },
   "nodemonConfig": {
