@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "nodemon",
     "start": "node -r module-alias/register ./dist/bin/www",
-    "build": "node etc/build",
-    "tsc": "tsc"
+    "build": "node etc/build"
   },
   "nodemonConfig": {
     "watch": [

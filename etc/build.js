@@ -3,6 +3,6 @@ const fs = require('fs');
 
 fs.rmSync('dist', { recursive: true, force: true })
 
-child_process.execSync('yarn run tsc -p "./tsconfig.build.json" --pretty')
+child_process.execSync('tsc -p ./tsconfig.build.json --pretty')
 
 fs.cpSync('src/public', 'dist/src/public', { recursive: true })
