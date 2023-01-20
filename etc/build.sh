@@ -1,6 +1,6 @@
 rm -rf dist
 
-export NODE_ENV=production
+# export NODE_ENV=production
 
 ./node_modules/typescript/bin/tsc -p ./tsconfig.build.json --pretty
 
