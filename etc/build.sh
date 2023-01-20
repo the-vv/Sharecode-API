@@ -1,8 +1,8 @@
-rimraf dist
+rm -rf dist
 
 export NODE_ENV=production
 
-npx tsc -p ./tsconfig.build.json --pretty
+./node_modules/typescript/bin/tsc -p ./tsconfig.build.json --pretty
 
 cp -R src/public dist/src/public
 

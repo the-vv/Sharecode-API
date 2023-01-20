@@ -8,7 +8,7 @@ const loggers_1 = require("@/utils/loggers");
 const router = express_1.default.Router();
 const logger = (0, loggers_1.getLogger)('USER_ROUTE');
 /* GET users listing. */
-router.get('/', function (_req, res, _next) {
+router.get('/', function (req, res) {
     logger.info('respond with a resource');
     res.send('respond with a resource');
 });
