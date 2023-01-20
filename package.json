@@ -6,7 +6,7 @@
     "dev": "nodemon",
     "start": "node -r module-alias/register ./dist/bin/www",
     "build": "node etc/build",
-    "build-linux": "bash etc/buils.sh",
+    "build-linux": "bash etc/build.sh",
     "tsc": "tsc"
   },
   "nodemonConfig": {
