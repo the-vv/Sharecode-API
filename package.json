@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "nodemon",
-    "start": "cross-env NODE_ENV=production node -r module-alias/register ./dist/bin/www",
+    "start": "node -r module-alias/register ./dist/bin/www",
     "build": "node etc/build"
   },
   "nodemonConfig": {
