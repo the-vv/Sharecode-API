@@ -2,7 +2,7 @@ rimraf dist
 
 export NODE_ENV=production
 
-tsc -p ./tsconfig.build.json --pretty
+npx tsc -p ./tsconfig.build.json --pretty
 
 cp -R src/public dist/src/public
 
