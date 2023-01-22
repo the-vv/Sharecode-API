@@ -4,7 +4,7 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors'
-import usersRouter from './routes/users';
+import authROuter from './routes/auth';
 
 class App {
   public app: express.Application;
@@ -29,7 +29,7 @@ class App {
     const apiRouter = express.Router();
     this.app.use('/api', apiRouter)
 
-    apiRouter.use('/users', usersRouter);
+    apiRouter.use('/auth', authROuter);
   }
 
 }

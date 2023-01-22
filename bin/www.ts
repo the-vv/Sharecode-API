@@ -9,6 +9,7 @@ config();
 import app from '@/app';
 import Debug from 'debug';
 import http from 'http';
+import { connect, set } from 'mongoose';
 
 const debug = Debug('sharecode-api:server');
 import { bootstrapLogger } from '@/utils/loggers';
@@ -31,7 +32,18 @@ const server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port, () => console.log(`🚀 ~ server launch  ~ port: ${port} ~ env: ${process.env.NODE_ENV}`));
+set({ strictQuery: true })
+connect(process.env.MONGO_URL || '').then(() => {
+  console.log(`Connected to MongoDB`);
+
+  server.listen(port, () => {
+    console.log(`🚀 ~ server launch  ~ port: ${port} ~ env: ${process.env.NODE_ENV}`)
+  });
+}).catch(err => {
+  console.error(err);
+  process.exit(1)
+})
+
 server.on('error', onError);
 server.on('listening', onListening);
 

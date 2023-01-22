@@ -3,7 +3,7 @@ import { appConstants } from '@/utils/constants';
 import jwt from 'jsonwebtoken';
 
 export const getNewJwt = (payload: ITokenData) => {
-    return jwt.sign(payload, String(process.env.TOKEN_SECRET), { expiresIn: appConstants.jwtExpirey })
+    return jwt.sign(payload, String(process.env.TOKEN_SECRET), { expiresIn: appConstants.jwtExpiry })
 }
 
 export const verifyJwt = (token: string) => {
