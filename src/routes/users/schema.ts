@@ -2,7 +2,7 @@ import { ECollections } from "@/enums/collections";
 import { TMongoDefault } from "@/interfaces/common";
 import { appConfigs } from "@/utils/configs";
 import { model, Schema } from "mongoose";
-import { string, z } from "zod";
+import { z } from "zod";
 
 export const userSchema = z.object({
     fullName: z.string().min(appConfigs.userNameMinlength).max(100),
