@@ -14,10 +14,10 @@ export class UserController {
         })
     }
 
-    public static getByEmail(email: string, includePassword = false) {
+    public static getByEmailAuth(email: string, includePassword = false) { // Used for login and signup
         return new Promise<TUser | null>((resolve, reject) => {
-            UserCollection.findOne({ email })
-                .select('email fullName' + (includePassword ? ' password' : ' -password'))
+            UserCollection.findOne({ email }, { password: Number(includePassword) })
+                .select('email fullName')
                 .lean()
                 .exec()
                 .then(res => {

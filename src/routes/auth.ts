@@ -21,7 +21,7 @@ const loginSchema = z.object({
 router.post('/login', (req, res) => {
   const body = loginSchema.safeParse(req.body);
   if (body.success) {
-    UserController.getByEmail(body.data.email, true).then(async (user) => {
+    UserController.getByEmailAuth(body.data.email, true).then(async (user) => {
       if (!user) {
         return res.status(StatusCodes.UNAUTHORIZED).json(appErrorJson(AppStrings.invalidEmailPassword));
       }
@@ -43,7 +43,7 @@ router.post('/login', (req, res) => {
 router.post('/signup', (req, res) => {
   const body = userSchema.required().safeParse(req.body);
   if (body.success) {
-    UserController.getByEmail(body.data.email).then(async (user) => {
+    UserController.getByEmailAuth(body.data.email).then(async (user) => {
       if (user) {
         return res.status(StatusCodes.BAD_REQUEST).json(appErrorJson(AppStrings.userExists));
       }
