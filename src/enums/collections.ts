@@ -1,3 +1,4 @@
 export enum ECollections {
-    user = 'User'
+    user = 'User',
+    token = 'Token'
 }

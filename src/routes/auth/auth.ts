@@ -2,16 +2,18 @@ import express from 'express';
 import { getLogger } from '@/utils/loggers';
 import { z } from 'zod';
 import { StatusCodes } from 'http-status-codes';
-import { UserController } from './users/controller';
+import { UserController } from '../users/controller';
 import { appConfigs } from '@/utils/configs';
 import { appErrorJson } from '@/utils/helper-functions';
 import bcrypt from 'bcrypt';
 import { AppStrings } from '@/utils/strings';
 import { getNewJwt } from '@/services/jwt-service';
-import { TUser, userSchema } from './users/schema';
+import { TUser, userSchema } from '../users/schema';
 const router = express.Router();
 const logger = getLogger('USER_ROUTE');
 import { OAuth2Client } from 'google-auth-library';
+import crypto from 'crypto';
+import { TokenCollection, tokenSchema } from './schema';
 
 
 const loginSchema = z.object({
@@ -81,7 +83,7 @@ router.post('/login', (req, res) => {
       return res.status(StatusCodes.UNAUTHORIZED).json(appErrorJson(AppStrings.invalidEmailPassword, err));
     });
   } else {
-    res.status(StatusCodes.BAD_REQUEST).json(appErrorJson(AppStrings.errorPerformingDbOperation, body.error))
+    res.status(StatusCodes.BAD_REQUEST).json(appErrorJson(AppStrings.validationErrorsOccurred, body.error))
   }
 });
 
@@ -109,5 +111,31 @@ router.post('/signup', (req, res) => {
     res.status(StatusCodes.BAD_REQUEST).json(appErrorJson(AppStrings.validationErrorsOccurred, body.error))
   }
 })
+
+router.post('/forgot-password', async (req, res) => {
+  const body = z.object({ email: z.string().email() }).safeParse(req.body);
+  if (body.success) {
+    const user = await UserController.getByEmailAuth(body.data.email || '');
+    if (!user) {
+      return res.status(StatusCodes.BAD_REQUEST).json(appErrorJson(AppStrings.emailEnteredIsNotRegistered));
+    }
+    const token = generateToken();
+    const tokenItem = await new TokenCollection({
+      token: token,
+      userId: user._id,
+    }).save();
+    if (tokenItem) {
+      res.json({ tokenItem })
+    } else {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(appErrorJson(AppStrings.errorPerformingDbOperation));
+    }
+  } else {
+    res.status(StatusCodes.BAD_REQUEST).json(appErrorJson(AppStrings.validationErrorsOccurred, body.error))
+  }
+})
+
+function generateToken() {
+  return crypto.randomBytes(20).toString('hex');
+}
 
 export default router;

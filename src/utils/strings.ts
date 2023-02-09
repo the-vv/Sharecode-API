@@ -5,4 +5,5 @@ export enum AppStrings {
     errorPerformingDbOperation = 'Error while trying to perform Database Operation',
     errorOccurredWhileLogin = 'Error Occurred while trying to login',
     accountCreatedWithSocialLogin = 'Account Created with Social Login, please login with social login',
+    emailEnteredIsNotRegistered = 'Email Entered is not registered',
 }
