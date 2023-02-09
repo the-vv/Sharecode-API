@@ -13,7 +13,8 @@ const router = express.Router();
 const logger = getLogger('USER_ROUTE');
 import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
-import { TokenCollection, tokenSchema } from './schema';
+import { TokenCollection } from './schema';
+import { sendPasswordResetEmail } from '@/services/email-service';
 
 
 const loginSchema = z.object({
@@ -33,7 +34,7 @@ router.post('/google', async (req, res) => {
     if (!payload) {
       return res.status(StatusCodes.BAD_REQUEST).json(appErrorJson(AppStrings.errorOccurredWhileLogin));
     }
-    const user = await UserController.getByEmailAuth(payload['email'] || '');
+    const user: TUser | null = await UserController.getByEmailAuth(payload['email'] || '');
     if (user) {
       // update user
       const updatedUser = await UserController.updateOne(user._id || '', {
@@ -46,7 +47,9 @@ router.post('/google', async (req, res) => {
       res.json(responseUser);
     } else {
       const newUser: TUser = {
-        ...body.data
+        email: payload['email'] || '',
+        fullName: payload['name'] || '',
+        image: payload['picture'] || '',
       };
       const resUser = await UserController.createOne(newUser).catch(err => {
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(appErrorJson(AppStrings.errorPerformingDbOperation, err));
@@ -125,7 +128,8 @@ router.post('/forgot-password', async (req, res) => {
       userId: user._id,
     }).save();
     if (tokenItem) {
-      res.json({ tokenItem })
+      await sendPasswordResetEmail(user.email || '', token);
+      res.json({ success: true });
     } else {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(appErrorJson(AppStrings.errorPerformingDbOperation));
     }

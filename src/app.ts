@@ -37,6 +37,9 @@ class App {
 
     // Error handler
     this.app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+      if (res.headersSent) {
+        return next(appErrorJson(err?.message ?? ReasonPhrases.INTERNAL_SERVER_ERROR, err));
+      }
       return res.status(err.status || StatusCodes.INTERNAL_SERVER_ERROR).json(appErrorJson(err?.message ?? ReasonPhrases.INTERNAL_SERVER_ERROR, err));
     });
   }

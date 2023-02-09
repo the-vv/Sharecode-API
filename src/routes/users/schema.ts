@@ -17,7 +17,7 @@ const userCollection = new Schema<TUser>({
     fullName: { type: String, required: true },
     email: { type: String, required: true },
     image: { type: String, required: false, default: null },
-    password: { type: String, required: true, select: false }
+    password: { type: String, required: false, select: false }
 });
 
 export const UserCollection = model<TUser>(ECollections.user, userCollection);
