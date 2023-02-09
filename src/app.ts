@@ -1,10 +1,13 @@
 
 import express from 'express';
+import 'express-async-errors';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors'
-import authROuter from './routes/auth';
+import authRouter from './routes/auth';
+import { ReasonPhrases, StatusCodes } from 'http-status-codes';
+import { appErrorJson } from './utils/helper-functions';
 
 class App {
   public app: express.Application;
@@ -29,7 +32,13 @@ class App {
     const apiRouter = express.Router();
     this.app.use('/api', apiRouter)
 
-    apiRouter.use('/auth', authROuter);
+    apiRouter.use('/auth', authRouter);
+
+
+    // Error handler
+    this.app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+      return res.status(err.status || StatusCodes.INTERNAL_SERVER_ERROR).json(appErrorJson(err?.message ?? ReasonPhrases.INTERNAL_SERVER_ERROR, err));
+    });
   }
 
 }

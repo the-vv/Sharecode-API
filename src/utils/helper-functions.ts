@@ -7,7 +7,6 @@ export const appErrorJson = (message: string, error?: any) => {
         error = generateErrorMessage(error.issues, { delimiter: { error: ', ' } });
     }
     return {
-        fail: true,
         message,
         error: error ?? ""
     }
