@@ -33,8 +33,14 @@ router.post('/google', async (req, res) => {
     }
     const user = await UserController.getByEmailAuth(payload['email'] || '');
     if (user) {
+      // update user
+      const updatedUser = await UserController.updateOne(user._id || '', {
+        email: payload['email'] || '',
+        fullName: payload['name'] || '',
+        image: payload['picture'] || '',
+      })
       const jwt = getNewJwt({ email: user.email, id: user._id || '' });
-      const responseUser = { token: jwt, user }
+      const responseUser = { token: jwt, user: updatedUser }
       res.json(responseUser);
     } else {
       const newUser: TUser = {

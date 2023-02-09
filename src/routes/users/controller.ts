@@ -40,7 +40,7 @@ export class UserController {
 
     public static updateOne(id: string, user: TUser) {
         return new Promise((resolve, reject) => {
-            UserCollection.updateOne({ _id: id }, user).exec().then(res => {
+            UserCollection.findByIdAndUpdate(id, user, { new: true }).then(res => {
                 resolve(res);
             }).catch(err => {
                 reject(err);
