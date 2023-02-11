@@ -127,7 +127,9 @@ router.post('/reset-password', async (req, res) => {
   if (!tokenValid) {
     return res.status(StatusCodes.BAD_REQUEST).json(appErrorJson(AppStrings.resetPasswordLinkExpired));
   }
-  const newUser = await UserController.updatePasswordByUserId(body.userId, body.password);
+  const password = await bcrypt.hash(body.password, appConfigs.passwordHashSaltLength)
+  const newUser = await UserController.updatePasswordByUserId(body.userId, password);
+  await TokenCollection.findOneAndDelete({ token: body.token, userId: body.userId });
   if (newUser) {
     res.json({ success: true });
   } else {
