@@ -6,4 +6,5 @@ export enum AppStrings {
     errorOccurredWhileLogin = 'Error Occurred while trying to login',
     accountCreatedWithSocialLogin = 'Account Created with Social Login, please login with social login',
     emailEnteredIsNotRegistered = 'Email Entered is not registered',
+    resetPasswordLinkExpired = 'Reset Password Link Expired',
 }
