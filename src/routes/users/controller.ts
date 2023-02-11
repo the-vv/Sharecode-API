@@ -29,7 +29,7 @@ export class UserController {
     }
 
     public static createOne(user: TUser) {
-        return new Promise((resolve, reject) => {
+        return new Promise<TUser | null>((resolve, reject) => {
             UserCollection.create(user).then(res => {
                 resolve(res);
             }).catch(err => {

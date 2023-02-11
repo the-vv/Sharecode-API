@@ -36,7 +36,6 @@ router.post('/google', async (req, res) => {
     }
     const user: TUser | null = await UserController.getByEmailAuth(payload['email'] || '');
     if (user) {
-      // update user
       const updatedUser = await UserController.updateOne(user._id || '', {
         email: payload['email'] || '',
         fullName: payload['name'] || '',
@@ -51,11 +50,11 @@ router.post('/google', async (req, res) => {
         fullName: payload['name'] || '',
         image: payload['picture'] || '',
       };
-      const resUser = await UserController.createOne(newUser).catch(err => {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(appErrorJson(AppStrings.errorPerformingDbOperation, err));
-      });
+      const resUser = await UserController.createOne(newUser);
       if (resUser) {
-        res.json({ success: true })
+        const jwt = getNewJwt({ email: resUser.email, id: resUser._id || '' });
+        const responseUser = { token: jwt, user: resUser }
+        res.json(responseUser);
       } else {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(appErrorJson(AppStrings.errorPerformingDbOperation));
       }
@@ -101,9 +100,7 @@ router.post('/signup', (req, res) => {
         ...body.data,
         password: await bcrypt.hash(body.data.password, appConfigs.passwordHashSaltLength)
       };
-      const resUser = await UserController.createOne(newUser).catch(err => {
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(appErrorJson(AppStrings.errorPerformingDbOperation, err));
-      });
+      const resUser = await UserController.createOne(newUser);
       if (resUser) {
         res.json({ success: true })
       } else {
@@ -118,17 +115,17 @@ router.post('/signup', (req, res) => {
 router.post('/forgot-password', async (req, res) => {
   const body = z.object({ email: z.string().email() }).safeParse(req.body);
   if (body.success) {
-    const user = await UserController.getByEmailAuth(body.data.email || '');
+    const user: TUser | null = await UserController.getByEmailAuth(body.data.email || '');
     if (!user) {
       return res.status(StatusCodes.BAD_REQUEST).json(appErrorJson(AppStrings.emailEnteredIsNotRegistered));
     }
-    const token = generateToken();
+    const token = crypto.randomBytes(20).toString('hex');
     const tokenItem = await new TokenCollection({
       token: token,
       userId: user._id,
     }).save();
     if (tokenItem) {
-      await sendPasswordResetEmail(user.email || '', token);
+      await sendPasswordResetEmail(user.email || '', token, user._id || '');
       res.json({ success: true });
     } else {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(appErrorJson(AppStrings.errorPerformingDbOperation));
@@ -138,8 +135,5 @@ router.post('/forgot-password', async (req, res) => {
   }
 })
 
-function generateToken() {
-  return crypto.randomBytes(20).toString('hex');
-}
 
 export default router;
