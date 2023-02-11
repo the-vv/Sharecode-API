@@ -13,7 +13,7 @@ const router = express.Router();
 const logger = getLogger('USER_ROUTE');
 import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
-import { TokenCollection } from './schema';
+import { TokenCollection } from './token.schema';
 import { sendPasswordResetEmail } from '@/services/email-service';
 
 
@@ -134,6 +134,22 @@ router.post('/forgot-password', async (req, res) => {
     res.status(StatusCodes.BAD_REQUEST).json(appErrorJson(AppStrings.validationErrorsOccurred, body.error))
   }
 })
+
+router.post('/reset-password', async (req, res) => {
+  const body = z.object({
+    token: z.string(),
+    password: z.string().min(appConfigs.passwordMinLength),
+    userId: z.string()
+  }).safeParse(req.body);
+  if (body.success) {
+    const newUser = await UserController.updatePasswordByUserId(body.data.userId, body.data.password);
+    if (newUser) {
+      res.json({ success: true });
+    } else {
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(appErrorJson(AppStrings.errorPerformingDbOperation));
+    }
+  }
+});
 
 
 export default router;

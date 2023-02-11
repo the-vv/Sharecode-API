@@ -24,9 +24,10 @@ export class UserController {
                     resolve(res);
                 }).catch(err => {
                     reject(err);
-                })
+                });
         });
     }
+
 
     public static createOne(user: TUser) {
         return new Promise<TUser | null>((resolve, reject) => {
@@ -34,7 +35,7 @@ export class UserController {
                 resolve(res);
             }).catch(err => {
                 reject(err);
-            })
+            });
         });
     }
 
@@ -44,7 +45,7 @@ export class UserController {
                 resolve(res);
             }).catch(err => {
                 reject(err);
-            })
+            });
         });
     }
 
@@ -54,7 +55,18 @@ export class UserController {
                 resolve(res);
             }).catch(err => {
                 reject(err);
-            })
+            });
         });
     }
+
+    public static updatePasswordByUserId(id: string, password: string) {
+        return new Promise((resolve, reject) => {
+            UserCollection.findByIdAndUpdate(id, { password }, { new: true }).then(res => {
+                resolve(res);
+            }).catch(err => {
+                reject(err);
+            });       
+        });
+    }
+
 }
