@@ -8,8 +8,11 @@ export const loginMW = async (req: Request, res: Response, next: NextFunction) =
     try {
         // Get auth token from header bearer token
         const token = req.headers.authorization;
+        if (!token?.includes('Bearer')) {
+            return res.status(StatusCodes.UNAUTHORIZED).json(appErrorJson(ReasonPhrases.UNAUTHORIZED));
+        }
         // Get json-web-token
-        const jwt = token?.split(' ')?.[1];
+        const jwt = token.split(' ')?.[1];
         if (!jwt) {
             return res.status(StatusCodes.UNAUTHORIZED).json(appErrorJson(ReasonPhrases.UNAUTHORIZED));
         }

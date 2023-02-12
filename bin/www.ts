@@ -32,14 +32,15 @@ const server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port, () => {
-  console.log(`🚀 ~ server launch  ~ port: ${port} ~ env: ${process.env.NODE_ENV}`)
-});
 set({ strictQuery: true });
 
 // mongo db connection
 connect(process.env.MONGO_URL || '').then(() => {
   console.log(`Connected to MongoDB`);
+
+  server.listen(port, () => {
+    console.log(`🚀 ~ server launch  ~ port: ${port} ~ env: ${process.env.NODE_ENV}`)
+  });
 
 }).catch(err => {
   console.error(err);
