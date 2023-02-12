@@ -21,7 +21,7 @@ class App {
   private config() {
 
     this.app.use(cors({
-      origin: ['http://localhost:4200'],
+      origin: ['http://localhost:4200', 'https://sharecodeapp.onrender.com'],
       credentials: true      
     }));
     this.app.use(logger('dev'));
