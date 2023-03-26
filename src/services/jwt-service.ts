@@ -10,7 +10,7 @@ export const verifyJwt = (token: string) => {
     return new Promise<any>((resolve, reject) => {
         jwt.verify(token, String(process.env.TOKEN_SECRET), (error, result) => {
             if (error) {
-                return reject()
+                return reject(error)
             }
             resolve(result)
         })

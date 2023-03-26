@@ -1,7 +1,7 @@
 import express from 'express';
 import { getLogger } from '@/utils/loggers';
 import { z } from 'zod';
-import { StatusCodes } from 'http-status-codes';
+import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import { UserController } from '../users/controller';
 import { appConfigs } from '@/utils/configs';
 import { appErrorJson } from '@/utils/helper-functions';
@@ -15,6 +15,7 @@ import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
 import { TokenCollection } from './token.schema';
 import { sendPasswordResetEmail } from '@/services/email-service';
+import { loginMW } from '@/middlewares/loginMW';
 
 
 router.post('/google', async (req, res) => {
@@ -137,5 +138,17 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+router.get('/profile', loginMW, async (req, res) => {
+  if (res.locals?.currentUser) { // this should be set from login middleware
+    const userId = res.locals.currentUser.id;
+    const currentUser = await UserController.getById(userId);
+    if (!currentUser) {
+      return res.status(StatusCodes.UNAUTHORIZED).json(appErrorJson(ReasonPhrases.UNAUTHORIZED));
+    }
+    res.json(currentUser)
+  } else {
+    return res.status(StatusCodes.UNAUTHORIZED).json(appErrorJson(ReasonPhrases.UNAUTHORIZED));
+  }
+});
 
 export default router;
