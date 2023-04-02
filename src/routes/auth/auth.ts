@@ -145,7 +145,8 @@ router.get('/profile', loginMW, async (req, res) => {
     if (!currentUser) {
       return res.status(StatusCodes.UNAUTHORIZED).json(appErrorJson(ReasonPhrases.UNAUTHORIZED));
     }
-    res.json(currentUser)
+    const jwt = getNewJwt({ email: currentUser.email, id: currentUser._id || '' });
+    res.json({user: currentUser, token: jwt})
   } else {
     return res.status(StatusCodes.UNAUTHORIZED).json(appErrorJson(ReasonPhrases.UNAUTHORIZED));
   }
