@@ -22,6 +22,6 @@ export const sendPasswordResetEmail = async (email: string, token: string, userI
             ${process.env.UI_PASSWORD_RESET_URL}/${userId}/${token}\n\n
             If you did not request this, please ignore this email and your password will remain unchanged.\n`
     };
-    return Promise.reject({ message: 'Email Services Temporarily Disabled' })
+    // return Promise.reject({ message: 'Email Services Temporarily Disabled' })
     await transporter.sendMail(mailOptions);
 };
