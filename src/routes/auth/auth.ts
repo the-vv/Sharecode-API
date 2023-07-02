@@ -21,10 +21,10 @@ import { loginMW } from '@/middlewares/loginMW';
 
 router.post('/google', async (req, res) => {
   const body = userSchema.extend({ idToken: z.string() }).parse(req.body);
-  const client = new OAuth2Client(appConfigs.googleClientId);
+  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   const ticket = await client.verifyIdToken({
     idToken: body.idToken,
-    audience: appConfigs.googleClientId
+    audience: process.env.GOOGLE_CLIENT_ID
   });
   const payload = ticket.getPayload();
   if (!payload) {
