@@ -8,6 +8,7 @@ import cors from 'cors'
 import authRouter from './routes/auth/auth';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import { appErrorJson } from './utils/helper-functions';
+import { snippetRouter } from './routes/snippet/router';
 
 class App {
   public app: express.Application;
@@ -36,6 +37,7 @@ class App {
     this.app.use('/api', apiRouter)
 
     apiRouter.use('/auth', authRouter);
+    apiRouter.use('/snippets', snippetRouter);
 
 
     // Error handler

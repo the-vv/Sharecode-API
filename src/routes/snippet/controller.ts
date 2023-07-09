@@ -1,9 +1,11 @@
-import { TUser, UserCollection } from "./schema";
+import { TListSchema } from "@/schemas/common-schemas";
+import { TSnippet, SnippetCollection, TSnippetList } from "./schema";
 
-export class UserController {
+export class SnippetController {
     public static getById(id: string) {
-        return new Promise<TUser | null>((resolve, reject) => {
-            UserCollection.findById(id)
+        return new Promise<TSnippet | null>((resolve, reject) => {
+            SnippetCollection.findById(id)
+                .select('-isDeleted -__v')
                 .lean()
                 .exec()
                 .then(res => {
@@ -14,24 +16,59 @@ export class UserController {
         })
     }
 
-    public static getByEmailAuth(email: string, includePassword = false) { // Used for login and signup
-        return new Promise<TUser | null>((resolve, reject) => {
-            UserCollection.findOne({ email }, { password: Number(includePassword) })
-                .select('email fullName image')
-                .lean()
-                .exec()
+    public static getByUserId(userId: string, listQuery: TListSchema) {
+        return new Promise<TSnippetList[] | null>((resolve, reject) => {
+            const query = SnippetCollection.aggregate([
+                {
+                    $match: { createdBy: userId, isDeleted: false }
+                },
+                {
+                    $addFields: {
+                        likeCount: { $size: "$likes" },
+                        commentsCount: { $size: "$comments" }
+                    }
+                },
+                {
+                    $project: {
+                        isDeleted: 0,
+                        __v: 0,
+                        likes: 0,
+                        comments: 0
+                    }
+                }
+            ])
+            if (listQuery?.skip && listQuery.skip > 0) query.skip(listQuery.skip);
+            if (listQuery?.limit && listQuery.limit > 0) query.limit(listQuery.limit);
+            if (listQuery?.sort) query.sort({ [listQuery.sort]: listQuery.order || 'asc' });
+            query.exec()
+                .then((res: TSnippetList[] | null) => {
+                    resolve(res);
+                }).catch((err: any) => {
+                    reject(err);
+                })
+        })
+    }
+
+    public static getTrending(listQuery: TListSchema) {
+        return new Promise<TSnippet[] | null>((resolve, reject) => {
+            const query = SnippetCollection.find({ isDeleted: false })
+                .select('-isDeleted -__v')
+                .sort({ views: -1 })
+            if (listQuery?.skip && listQuery.skip > 0) query.skip(listQuery.skip);
+            if (listQuery?.limit && listQuery.limit > 0) query.limit(listQuery.limit);
+            if (listQuery?.sort) query.sort({ [listQuery.sort]: listQuery.order || 'asc' });
+            query.exec()
                 .then(res => {
                     resolve(res);
                 }).catch(err => {
                     reject(err);
-                });
-        });
+                })
+        })
     }
 
-
-    public static createOne(user: TUser) {
-        return new Promise<TUser | null>((resolve, reject) => {
-            UserCollection.create(user).then(res => {
+    public static createOne(snippet: TSnippet) {
+        return new Promise<TSnippet | null>((resolve, reject) => {
+            SnippetCollection.create(snippet).then(res => {
                 resolve(res);
             }).catch(err => {
                 reject(err);
@@ -39,9 +76,9 @@ export class UserController {
         });
     }
 
-    public static updateOne(id: string, user: TUser) {
+    public static updateOne(id: string, snippet: TSnippet) {
         return new Promise((resolve, reject) => {
-            UserCollection.findByIdAndUpdate(id, user, { new: true }).then(res => {
+            SnippetCollection.findByIdAndUpdate(id, snippet, { new: true }).then(res => {
                 resolve(res);
             }).catch(err => {
                 reject(err);
@@ -49,9 +86,9 @@ export class UserController {
         });
     }
 
-    public static deleteById(id: string) {
+    public static softDeleteById(id: string) {
         return new Promise((resolve, reject) => {
-            UserCollection.findByIdAndDelete(id).then(res => {
+            SnippetCollection.findByIdAndUpdate(id, { isDeleted: true }).then(res => {
                 resolve(res);
             }).catch(err => {
                 reject(err);
@@ -59,13 +96,13 @@ export class UserController {
         });
     }
 
-    public static updatePasswordByUserId(id: string, password: string) {
+    public static hardDeleteById(id: string) {
         return new Promise((resolve, reject) => {
-            UserCollection.findByIdAndUpdate(id, { password }, { new: true }).then(res => {
+            SnippetCollection.findByIdAndDelete(id).then(res => {
                 resolve(res);
             }).catch(err => {
                 reject(err);
-            });       
+            });
         });
     }
 
