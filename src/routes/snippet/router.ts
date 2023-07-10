@@ -37,12 +37,27 @@ router.put('/:id/comment', async (req, res) => {
 })
 
 router.delete('/:id/comment/:commentId', async (req, res) => {
+    if (!req.params.commentId) {
+        return res.status(400).json(appErrorJson('commentId is required'));
+    }
     if (!appConfigs.mongoDBIdRegexp.test(req.params.commentId)) {
         return res.status(400).json(appErrorJson('commentId is invalid'));
     }
     const snippet = await SnippetController.removeComment(req.params.id, req.params.commentId);
     res.json(snippet);
 })
+
+router.delete('/:id/like/:userId', async (req, res) => {
+    if (!req.params.userId) {
+        return res.status(400).json(appErrorJson('userId is required'));
+    }
+    if (!appConfigs.mongoDBIdRegexp.test(req.params.userId)) {
+        return res.status(400).json(appErrorJson('userId is invalid'));
+    }
+    const snippet = await SnippetController.removeLike(req.params.id, req.params.userId);
+    res.json(snippet);
+})
+
 
 router.put('/:id/like', async (req, res) => {
     if (!req.body.userId) {
@@ -52,17 +67,6 @@ router.put('/:id/like', async (req, res) => {
         return res.status(400).json(appErrorJson('userId is invalid'));
     }
     const snippet = await SnippetController.addLike(req.params.id, req.body.userId);
-    res.json(snippet);
-})
-
-router.delete('/:id/like', async (req, res) => {
-    if (!req.body.userId) {
-        return res.status(400).json(appErrorJson('userId is required'));
-    }
-    if (!appConfigs.mongoDBIdRegexp.test(req.body.userId)) {
-        return res.status(400).json(appErrorJson('userId is invalid'));
-    }
-    const snippet = await SnippetController.removeLike(req.params.id, req.body.userId);
     res.json(snippet);
 })
 
