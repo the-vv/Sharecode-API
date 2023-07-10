@@ -46,12 +46,17 @@ const snippetCollection = new Schema<TSnippet>({
         type: {
             comment: { type: String, required: true },
             createdAt: { type: Date, required: false, default: Date.now },
-            createdBy: { type: String, required: true }
+            createdBy: { type: String, required: true, ref: ECollections.user }
         },
         required: false,
         default: []
     }],
-    likes: [{ type: String, required: false, default: [] }],
+    likes: [{
+        type: String,
+        required: false,
+        default: [],
+        ref: ECollections.user
+    }],
     isDeleted: { type: Boolean, required: false, default: false },
     createdAt: { type: Date, required: true, default: Date.now }
 });

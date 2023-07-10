@@ -71,6 +71,16 @@ router.get('/:id', async (req, res) => {
     res.json(snippet);
 })
 
+router.get('/:id/likes', async (req, res) => {
+    const snippet = await SnippetController.getLikes(req.params.id);
+    res.json(snippet);
+})
+
+router.get('/:id/comments', async (req, res) => {
+    const snippet = await SnippetController.getComments(req.params.id);
+    res.json(snippet);
+})
+
 router.patch('/:id/views', async (req, res) => {
     const snippet = await SnippetController.incrementViewCopy(req.params.id, false);
     res.json(snippet);
@@ -81,5 +91,20 @@ router.patch('/:id/copies', async (req, res) => {
     res.json(snippet);
 })
 
+router.delete('/:id', async (req, res) => {
+    if (!appConfigs.mongoDBIdRegexp.test(req.params.id)) {
+        return res.status(400).json(appErrorJson('id is invalid'));
+    }
+    const snippet = await SnippetController.softDeleteById(req.params.id);
+    res.json(snippet);
+})
+
+router.delete('/:id/force', async (req, res) => {
+    if (!appConfigs.mongoDBIdRegexp.test(req.params.id)) {
+        return res.status(400).json(appErrorJson('id is invalid'));
+    }
+    const snippet = await SnippetController.hardDeleteById(req.params.id);
+    res.json(snippet);
+})
 
 export const snippetRouter = router;

@@ -148,8 +148,22 @@ export class SnippetController {
             SnippetCollection.findById(id)
                 .select('comments')
                 .sort({ 'comments.createdAt': -1 })
+                .populate(['comments.createdBy'])
                 .then(res => {
                     resolve(res?.comments || null);
+                }).catch(err => {
+                    reject(err);
+                })
+        })
+    }
+
+    public static getLikes(id: string) {
+        return new Promise<string[] | null>((resolve, reject) => {
+            SnippetCollection.findById(id)
+                .select('likes')
+                .populate('likes')
+                .then(res => {
+                    resolve(res?.likes || null);
                 }).catch(err => {
                     reject(err);
                 })
