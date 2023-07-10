@@ -15,7 +15,7 @@ export type TUser = z.infer<typeof userSchema> & TMongoDefault;
 
 const userCollection = new Schema<TUser>({
     fullName: { type: String, required: true },
-    email: { type: String, required: true },
+    email: { type: String, required: true, unique: true, trim: true, lowercase: true },
     image: { type: String, required: false, default: null },
     password: { type: String, required: false, select: false }
 });

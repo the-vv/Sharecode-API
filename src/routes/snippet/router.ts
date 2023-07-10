@@ -2,7 +2,9 @@ import { ListSchema } from "@/schemas/common-schemas";
 import express from "express";
 import { z } from 'zod';
 import { SnippetController } from "./controller";
-import { snippetSchema } from "./schema";
+import { CommentsSchema, snippetSchema } from "./schema";
+import { appConfigs } from "@/utils/configs";
+import { appErrorJson } from "@/utils/helper-functions";
 
 const router = express.Router();
 
@@ -27,5 +29,57 @@ router.post('/trending', async (req, res) => {
     const trendingSnippets = await SnippetController.getTrending(body);
     res.json(trendingSnippets);
 })
+
+router.put('/:id/comment', async (req, res) => {
+    const body = CommentsSchema.parse(req.body);
+    const snippet = await SnippetController.addComment(req.params.id, body);
+    res.json(snippet);
+})
+
+router.delete('/:id/comment/:commentId', async (req, res) => {
+    if (!appConfigs.mongoDBIdRegexp.test(req.params.commentId)) {
+        return res.status(400).json(appErrorJson('commentId is invalid'));
+    }
+    const snippet = await SnippetController.removeComment(req.params.id, req.params.commentId);
+    res.json(snippet);
+})
+
+router.put('/:id/like', async (req, res) => {
+    if (!req.body.userId) {
+        return res.status(400).json(appErrorJson('userId is required'));
+    }
+    if (!appConfigs.mongoDBIdRegexp.test(req.body.userId)) {
+        return res.status(400).json(appErrorJson('userId is invalid'));
+    }
+    const snippet = await SnippetController.addLike(req.params.id, req.body.userId);
+    res.json(snippet);
+})
+
+router.delete('/:id/like', async (req, res) => {
+    if (!req.body.userId) {
+        return res.status(400).json(appErrorJson('userId is required'));
+    }
+    if (!appConfigs.mongoDBIdRegexp.test(req.body.userId)) {
+        return res.status(400).json(appErrorJson('userId is invalid'));
+    }
+    const snippet = await SnippetController.removeLike(req.params.id, req.body.userId);
+    res.json(snippet);
+})
+
+router.get('/:id', async (req, res) => {
+    const snippet = await SnippetController.getById(req.params.id);
+    res.json(snippet);
+})
+
+router.patch('/:id/views', async (req, res) => {
+    const snippet = await SnippetController.incrementViewCopy(req.params.id, false);
+    res.json(snippet);
+})
+
+router.patch('/:id/copies', async (req, res) => {
+    const snippet = await SnippetController.incrementViewCopy(req.params.id, true);
+    res.json(snippet);
+})
+
 
 export const snippetRouter = router;
