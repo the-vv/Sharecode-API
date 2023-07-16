@@ -18,6 +18,6 @@ const userCollection = new Schema<TUser>({
     email: { type: String, required: true, unique: true, trim: true, lowercase: true },
     image: { type: String, required: false, default: null },
     password: { type: String, required: false, select: false }
-});
+}, { versionKey: false });
 
 export const UserCollection = model<TUser>(ECollections.user, userCollection);

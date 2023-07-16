@@ -59,6 +59,6 @@ const snippetCollection = new Schema<TSnippet>({
     }],
     isDeleted: { type: Boolean, required: false, default: false },
     createdAt: { type: Date, required: true, default: Date.now }
-});
+}, { versionKey: false });
 
 export const SnippetCollection = model<TSnippet>(ECollections.snippet, snippetCollection);

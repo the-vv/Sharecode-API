@@ -15,6 +15,6 @@ const tokenCollection = new Schema<TToken>({
     userId: { type: String, required: true, ref: ECollections.user },
     token: { type: String, required: true },
     createdAt: { type: Date, default: Date.now, expires: 3600 }
-});
+}, { versionKey: false });
 
 export const TokenCollection = model<TToken>(ECollections.token, tokenCollection);

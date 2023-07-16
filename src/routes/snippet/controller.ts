@@ -172,9 +172,28 @@ export class SnippetController {
 
     public static getTrending(listQuery: TListSchema) {
         return new Promise<TSnippet[] | null>((resolve, reject) => {
-            const query = SnippetCollection.find({ isDeleted: false })
-                .select('-isDeleted -__v')
-                .sort({ views: -1 })
+            const query = SnippetCollection.aggregate([
+                {
+                    $match: { isDeleted: false }
+                },
+                {
+                    $sort: { copies: -1 }
+                },
+                {
+                    $addFields: {
+                        likeCount: { $size: "$likes" },
+                        commentsCount: { $size: "$comments" }
+                    }
+                },
+                {
+                    $project: {
+                        isDeleted: 0,
+                        __v: 0,
+                        likes: 0,
+                        comments: 0
+                    }
+                }
+            ])
             if (listQuery?.skip && listQuery.skip > 0) query.skip(listQuery.skip);
             if (listQuery?.limit && listQuery.limit > 0) query.limit(listQuery.limit);
             if (listQuery?.sort) query.sort({ [listQuery.sort]: listQuery.order || 'asc' });

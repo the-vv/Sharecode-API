@@ -16,11 +16,6 @@ router.get('/my-snippets', async (req, res) => {
     res.json(userSnippets);
 })
 
-router.get('/:id', async (req, res) => {
-    const snippet = await SnippetController.getById(req.params.id);
-    res.json(snippet);
-})
-
 router.get('/:id/likes', async (req, res) => {
     const snippet = await SnippetController.getLikes(req.params.id);
     res.json(snippet);
@@ -31,12 +26,15 @@ router.get('/:id/comments', async (req, res) => {
     res.json(snippet);
 })
 
-router.post('/trending', async (req, res) => {
-    const body = ListSchema.extend({
-        userId: z.string()
-    }).parse(req.body);
+router.get('/trending', async (req, res) => {
+    const body = ListSchema.parse(req.params);
     const trendingSnippets = await SnippetController.getTrending(body);
     res.json(trendingSnippets);
+})
+
+router.get('/:id', async (req, res) => {
+    const snippet = await SnippetController.getById(req.params.id);
+    res.json(snippet);
 })
 
 router.post('/', async (req, res) => {
