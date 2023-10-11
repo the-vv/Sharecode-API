@@ -35,6 +35,7 @@ const server = http.createServer(app);
 set({ strictQuery: true });
 
 // mongo db connection
+console.log(`Connecting to MongoDB`, process.env.MONGO_URL);
 connect(process.env.MONGO_URL || '').then(() => {
   console.log(`Connected to MongoDB`);
 
