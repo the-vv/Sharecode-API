@@ -9,9 +9,10 @@ import { appErrorJson } from "@/utils/helper-functions";
 const router = express.Router();
 
 router.get('/my-snippets', async (req, res) => {
+    console.log(req.params)
     const body = ListSchema.extend({
         userId: z.string()
-    }).parse(req.body);
+    }).parse(req.query);
     const userSnippets = await SnippetController.getByUserId(body.userId, body);
     res.json(userSnippets);
 })

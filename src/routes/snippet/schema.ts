@@ -15,7 +15,7 @@ export const snippetSchema = z.object({
     code: z.string().max(appConfigs.codeMaxLengthFree),
     summary: z.string().max(1000).optional(),
     language: z.string().max(100).optional(),
-    tags: z.array(z.string().max(100)).optional(),
+    tags: z.array(z.string().max(100)).max(10).optional(),
     isPublic: z.boolean(),
     createdBy: z.string().regex(appConfigs.mongoDBIdRegexp),
     copies: z.number().optional(),
