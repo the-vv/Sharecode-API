@@ -1,6 +1,10 @@
 import { TListSchema } from "@/schemas/common-schemas";
 import { TSnippet, SnippetCollection, TSnippetList, TSnippetComment } from "./schema";
 import mongoose from "mongoose";
+import { AppStrings } from "@/utils/strings";
+import { IListResponse } from '../../interfaces/common';
+import { getListQuery } from '../../utils/helper-functions';
+import { appConfigs } from "@/utils/configs";
 
 export class SnippetController {
     public static getById(id: string) {
@@ -28,6 +32,10 @@ export class SnippetController {
             ])
                 .exec()
                 .then(res => {
+                    if (res.length === 0) {
+                        reject(AppStrings.notFound);
+                        return;
+                    }
                     resolve(res[0]);
                 }).catch(err => {
                     reject(err);
@@ -36,32 +44,54 @@ export class SnippetController {
     }
 
     public static getByUserId(userId: string, listQuery: TListSchema) {
-        return new Promise<TSnippetList[] | null>((resolve, reject) => {
+        return new Promise<IListResponse<TSnippet> | null>((resolve, reject) => {
+            const searchQuery = [];
+            if (listQuery?.search) searchQuery.push({ $text: { $search: listQuery.search } });
             const query = SnippetCollection.aggregate([
                 {
-                    $match: { createdBy: userId, isDeleted: false }
-                },
+                    $match: {
+                        $and: [
+                            { isDeleted: false, createdBy: userId },
+                            ...searchQuery
+                        ]
+                    }
+                },                
                 {
-                    $addFields: {
-                        likeCount: { $size: "$likes" },
-                        commentsCount: { $size: "$comments" }
+                    $facet: {
+                        result: [
+                            {
+                                $addFields: {
+                                    likeCount: { $size: "$likes" },
+                                    commentsCount: { $size: "$comments" }
+                                }
+                            },
+                            ...getListQuery(listQuery, appConfigs.defaultQueryLimit),
+                            {
+                                $project: {
+                                    isDeleted: 0,
+                                    __v: 0,
+                                    likes: 0,
+                                    comments: 0
+                                }
+                            },
+                        ],
+                        totalItems: [
+                            { $count: 'count' } // Count the total number of documents
+                        ]
                     }
                 },
                 {
                     $project: {
-                        isDeleted: 0,
-                        __v: 0,
-                        likes: 0,
-                        comments: 0
+                        totalItems: {
+                            $arrayElemAt: ['$totalItems.count', 0]
+                        },
+                        result: "$result"
                     }
                 }
             ])
-            if (listQuery?.skip && listQuery.skip > 0) query.skip(listQuery.skip);
-            if (listQuery?.limit && listQuery.limit > 0) query.limit(listQuery.limit);
-            if (listQuery?.sort) query.sort({ [listQuery.sort]: listQuery.order || 'asc' });
             query.exec()
-                .then((res: TSnippetList[] | null) => {
-                    resolve(res);
+                .then((res: IListResponse<TSnippet>[]) => {
+                    resolve(res[0]);
                 }).catch((err: any) => {
                     reject(err);
                 })
@@ -172,25 +202,50 @@ export class SnippetController {
 
     public static getTrending(listQuery: TListSchema) {
         return new Promise<TSnippet[] | null>((resolve, reject) => {
+            const searchQuery = [];
+            if (listQuery?.search) searchQuery.push({ $text: { $search: listQuery.search } });
             const query = SnippetCollection.aggregate([
                 {
-                    $match: { isDeleted: false }
+                    $match: {
+                        $and: [
+                            { isDeleted: false },
+                            ...searchQuery
+                        ]
+                    }
                 },
                 {
                     $sort: { copies: -1 }
                 },
                 {
-                    $addFields: {
-                        likeCount: { $size: "$likes" },
-                        commentsCount: { $size: "$comments" }
+                    $facet: {
+                        result: [
+                            {
+                                $addFields: {
+                                    likeCount: { $size: "$likes" },
+                                    commentsCount: { $size: "$comments" }
+                                }
+                            },
+                            ...getListQuery(listQuery, appConfigs.defaultQueryLimit),
+                            {
+                                $project: {
+                                    isDeleted: 0,
+                                    __v: 0,
+                                    likes: 0,
+                                    comments: 0
+                                }
+                            },
+                        ],
+                        totalItems: [
+                            { $count: 'count' } // Count the total number of documents
+                        ]
                     }
                 },
                 {
                     $project: {
-                        isDeleted: 0,
-                        __v: 0,
-                        likes: 0,
-                        comments: 0
+                        totalItems: {
+                            $arrayElemAt: ['$totalItems.count', 0]
+                        },
+                        result: "$result"
                     }
                 }
             ])

@@ -62,3 +62,13 @@ const snippetCollection = new Schema<TSnippet>({
 }, { versionKey: false });
 
 export const SnippetCollection = model<TSnippet>(ECollections.snippet, snippetCollection);
+
+SnippetCollection.collection.createIndex({
+    title: "text",
+    code: "text",
+    summary: "text"
+}, {
+    name: "snippet_search_index",
+    default_language: "en",
+    language_override: "en"
+});

@@ -5,15 +5,17 @@ import { SnippetController } from "./controller";
 import { CommentsSchema, snippetSchema } from "./schema";
 import { appConfigs } from "@/utils/configs";
 import { appErrorJson } from "@/utils/helper-functions";
+import { AppStrings } from "@/utils/strings";
 
 const router = express.Router();
 
 router.get('/my-snippets', async (req, res) => {
-    console.log(req.params)
-    const body = ListSchema.extend({
-        userId: z.string()
-    }).parse(req.query);
-    const userSnippets = await SnippetController.getByUserId(body.userId, body);
+    if (!res.locals?.currentUser?.id) {
+        return res.status(400).json(appErrorJson(AppStrings.unauthorizedAccess));
+    }
+    const userId = res.locals.currentUser.id;
+    const body = ListSchema.parse(req.query);
+    const userSnippets = await SnippetController.getByUserId(userId, body);
     res.json(userSnippets);
 })
 

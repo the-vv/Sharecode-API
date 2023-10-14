@@ -7,4 +7,6 @@ export enum AppStrings {
     accountCreatedWithSocialLogin = 'Account Created with Social Login, please login with social login',
     emailEnteredIsNotRegistered = 'Email Entered is not registered',
     resetPasswordLinkExpired = 'Link Expired or Invalid',
+    unauthorizedAccess = 'Unauthorized Access',
+    notFound = 'Not Found',
 }
