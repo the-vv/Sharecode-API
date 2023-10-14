@@ -1,4 +1,4 @@
-export const appConfigs = {
+export const AppConfigs = {
     passwordMinLength: 6,
     userNameMinlength: 3,
     passwordHashSaltLength: 12,
@@ -7,4 +7,5 @@ export const appConfigs = {
     codeMaxLengthPro: 100000,
     mongoDBIdRegexp: /^[0-9a-fA-F]{24}$/,
     defaultQueryLimit: 20,
+    listCodeMaxLength: 100,
 } as const

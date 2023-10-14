@@ -3,7 +3,7 @@ import { getLogger } from '@/utils/loggers';
 import { z } from 'zod';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import { UserController } from '../users/controller';
-import { appConfigs } from '@/utils/configs';
+import { AppConfigs } from '@/utils/configs';
 import { appErrorJson } from '@/utils/helper-functions';
 import bcrypt from 'bcrypt';
 import { AppStrings } from '@/utils/strings';
@@ -60,7 +60,7 @@ router.post('/google', async (req, res) => {
 router.post('/login', (req, res) => {
   const body = z.object({
     email: z.string().email(),
-    password: z.string().min(appConfigs.passwordMinLength)
+    password: z.string().min(AppConfigs.passwordMinLength)
   }).parse(req.body);
   UserController.getByEmailAuth(body.email, true).then(async (user) => {
     if (!user) {
@@ -89,7 +89,7 @@ router.post('/signup', (req, res) => {
     }
     const newUser = {
       ...body,
-      password: await bcrypt.hash(body.password, appConfigs.passwordHashSaltLength)
+      password: await bcrypt.hash(body.password, AppConfigs.passwordHashSaltLength)
     };
     const resUser = await UserController.createOne(newUser);
     if (resUser) {
@@ -122,14 +122,14 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
   const body = z.object({
     token: z.string(),
-    password: z.string().min(appConfigs.passwordMinLength),
+    password: z.string().min(AppConfigs.passwordMinLength),
     userId: z.string()
   }).parse(req.body);
   const tokenValid = await TokenCollection.find({ token: body.token, userId: body.userId }).countDocuments();
   if (!tokenValid) {
     return res.status(StatusCodes.BAD_REQUEST).json(appErrorJson(AppStrings.resetPasswordLinkExpired));
   }
-  const password = await bcrypt.hash(body.password, appConfigs.passwordHashSaltLength)
+  const password = await bcrypt.hash(body.password, AppConfigs.passwordHashSaltLength)
   const newUser = await UserController.updatePasswordByUserId(body.userId, password);
   await TokenCollection.findOneAndDelete({ token: body.token, userId: body.userId });
   if (newUser) {

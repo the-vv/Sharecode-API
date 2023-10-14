@@ -1,12 +1,12 @@
 import { ECollections } from "@/enums/collections";
 import { TMongoDefault } from "@/interfaces/common";
-import { appConfigs } from "@/utils/configs";
+import { AppConfigs } from "@/utils/configs";
 import { model, Schema } from "mongoose";
 import { z } from "zod";
 
 export const userSchema = z.object({
-    fullName: z.string().min(appConfigs.userNameMinlength).max(100),
-    password: z.string().min(appConfigs.passwordMinLength).max(100).optional(),
+    fullName: z.string().min(AppConfigs.userNameMinlength).max(100),
+    password: z.string().min(AppConfigs.passwordMinLength).max(100).optional(),
     email: z.string().email(),
     image: z.string().optional().nullable()
 })

@@ -1,27 +1,27 @@
 import { ECollections } from "@/enums/collections";
 import { TMongoDefault } from "@/interfaces/common";
-import { appConfigs } from "@/utils/configs";
+import { AppConfigs } from "@/utils/configs";
 import { model, Schema } from "mongoose";
 import { z } from "zod";
 
 export const CommentsSchema = z.object({
     comment: z.string().max(1000),
     createdAt: z.date().optional(),
-    createdBy: z.string().regex(appConfigs.mongoDBIdRegexp)
+    createdBy: z.string().regex(AppConfigs.mongoDBIdRegexp)
 })
 
 export const snippetSchema = z.object({
     title: z.string().max(500).optional(),
-    code: z.string().max(appConfigs.codeMaxLengthFree),
+    code: z.string().max(AppConfigs.codeMaxLengthFree),
     summary: z.string().max(1000).optional(),
     language: z.string().max(100).optional(),
     tags: z.array(z.string().max(100)).max(10).optional(),
     isPublic: z.boolean(),
-    createdBy: z.string().regex(appConfigs.mongoDBIdRegexp),
+    createdBy: z.string().regex(AppConfigs.mongoDBIdRegexp),
     copies: z.number().optional(),
     views: z.number().optional(),
     comments: z.array(CommentsSchema).optional(),
-    likes: z.array(z.string().regex(appConfigs.mongoDBIdRegexp)).optional(),
+    likes: z.array(z.string().regex(AppConfigs.mongoDBIdRegexp)).optional(),
     isDeleted: z.boolean().optional(),
     createdAt: z.date().optional()
 })

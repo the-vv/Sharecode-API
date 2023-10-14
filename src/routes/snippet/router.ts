@@ -1,9 +1,8 @@
 import { ListSchema } from "@/schemas/common-schemas";
 import express from "express";
-import { z } from 'zod';
 import { SnippetController } from "./controller";
 import { CommentsSchema, snippetSchema } from "./schema";
-import { appConfigs } from "@/utils/configs";
+import { AppConfigs } from "@/utils/configs";
 import { appErrorJson } from "@/utils/helper-functions";
 import { AppStrings } from "@/utils/strings";
 
@@ -17,6 +16,11 @@ router.get('/my-snippets', async (req, res) => {
     const body = ListSchema.parse(req.query);
     const userSnippets = await SnippetController.getByUserId(userId, body);
     res.json(userSnippets);
+})
+
+router.get('/:id/code', async (req, res) => {
+    const snippet = await SnippetController.getCodeById(req.params.id);
+    res.json(snippet);
 })
 
 router.get('/:id/likes', async (req, res) => {
@@ -56,7 +60,7 @@ router.put('/:id/like', async (req, res) => {
     if (!req.body.userId) {
         return res.status(400).json(appErrorJson('userId is required'));
     }
-    if (!appConfigs.mongoDBIdRegexp.test(req.body.userId)) {
+    if (!AppConfigs.mongoDBIdRegexp.test(req.body.userId)) {
         return res.status(400).json(appErrorJson('userId is invalid'));
     }
     const snippet = await SnippetController.addLike(req.params.id, req.body.userId);
@@ -74,7 +78,7 @@ router.patch('/:id/copies', async (req, res) => {
 })
 
 router.delete('/:id', async (req, res) => {
-    if (!appConfigs.mongoDBIdRegexp.test(req.params.id)) {
+    if (!AppConfigs.mongoDBIdRegexp.test(req.params.id)) {
         return res.status(400).json(appErrorJson('id is invalid'));
     }
     const snippet = await SnippetController.softDeleteById(req.params.id);
@@ -82,7 +86,7 @@ router.delete('/:id', async (req, res) => {
 })
 
 router.delete('/:id/force', async (req, res) => {
-    if (!appConfigs.mongoDBIdRegexp.test(req.params.id)) {
+    if (!AppConfigs.mongoDBIdRegexp.test(req.params.id)) {
         return res.status(400).json(appErrorJson('id is invalid'));
     }
     const snippet = await SnippetController.hardDeleteById(req.params.id);
@@ -93,7 +97,7 @@ router.delete('/:id/like/:userId', async (req, res) => {
     if (!req.params.userId) {
         return res.status(400).json(appErrorJson('userId is required'));
     }
-    if (!appConfigs.mongoDBIdRegexp.test(req.params.userId)) {
+    if (!AppConfigs.mongoDBIdRegexp.test(req.params.userId)) {
         return res.status(400).json(appErrorJson('userId is invalid'));
     }
     const snippet = await SnippetController.removeLike(req.params.id, req.params.userId);
@@ -104,7 +108,7 @@ router.delete('/:id/comment/:commentId', async (req, res) => {
     if (!req.params.commentId) {
         return res.status(400).json(appErrorJson('commentId is required'));
     }
-    if (!appConfigs.mongoDBIdRegexp.test(req.params.commentId)) {
+    if (!AppConfigs.mongoDBIdRegexp.test(req.params.commentId)) {
         return res.status(400).json(appErrorJson('commentId is invalid'));
     }
     const snippet = await SnippetController.removeComment(req.params.id, req.params.commentId);

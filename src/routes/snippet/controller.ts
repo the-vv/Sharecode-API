@@ -4,9 +4,22 @@ import mongoose from "mongoose";
 import { AppStrings } from "@/utils/strings";
 import { IListResponse } from '../../interfaces/common';
 import { getListQuery } from '../../utils/helper-functions';
-import { appConfigs } from "@/utils/configs";
+import { AppConfigs } from "@/utils/configs";
 
 export class SnippetController {
+
+    public static getCodeById(id: string) {
+        return new Promise<{ code: string } | null>((resolve, reject) => {
+            SnippetCollection.findById(id)
+                .select('code')
+                .then(res => {
+                    resolve(res || null);
+                }).catch(err => {
+                    reject(err);
+                })
+        })
+    }
+
     public static getById(id: string) {
         return new Promise<TSnippetList | null>((resolve, reject) => {
             const objectId = new mongoose.Types.ObjectId(id);
@@ -25,7 +38,7 @@ export class SnippetController {
                         isDeleted: 0,
                         __v: 0,
                         likes: 0,
-                        comments: 0
+                        comments: 0,
                     }
                 },
                 { $limit: 1 }
@@ -55,17 +68,18 @@ export class SnippetController {
                             ...searchQuery
                         ]
                     }
-                },                
+                },
                 {
                     $facet: {
                         result: [
                             {
                                 $addFields: {
                                     likeCount: { $size: "$likes" },
-                                    commentsCount: { $size: "$comments" }
+                                    commentsCount: { $size: "$comments" },
+                                    code: { $substr: ["$code", 0, AppConfigs.listCodeMaxLength] }, // limiting code length
                                 }
                             },
-                            ...getListQuery(listQuery, appConfigs.defaultQueryLimit),
+                            ...getListQuery(listQuery, AppConfigs.defaultQueryLimit),
                             {
                                 $project: {
                                     isDeleted: 0,
@@ -74,6 +88,11 @@ export class SnippetController {
                                     comments: 0
                                 }
                             },
+                            // {
+                            //     $project: {
+                            //         code: { $substr: ["$code", 0, 2] },
+                            //     }
+                            // }
                         ],
                         totalItems: [
                             { $count: 'count' } // Count the total number of documents
@@ -106,12 +125,12 @@ export class SnippetController {
                     copies: isCopy ? 1 : 0
                 }
             }, { new: true })
-            .select('views copies')
-            .then(res => {
-                resolve(res);
-            }).catch(err => {
-                reject(err);
-            })
+                .select('views copies')
+                .then(res => {
+                    resolve(res);
+                }).catch(err => {
+                    reject(err);
+                })
         })
     }
 
@@ -120,12 +139,12 @@ export class SnippetController {
             SnippetCollection.findByIdAndUpdate(id, {
                 $addToSet: { likes: userId }
             }, { new: true })
-            .select('likes')
-            .then(res => {
-                resolve(res);
-            }).catch(err => {
-                reject(err);
-            })
+                .select('likes')
+                .then(res => {
+                    resolve(res);
+                }).catch(err => {
+                    reject(err);
+                })
         })
     }
 
@@ -134,12 +153,12 @@ export class SnippetController {
             SnippetCollection.findByIdAndUpdate(id, {
                 $pull: { likes: userId }
             }, { new: true })
-            .select('likes')
-            .then(res => {
-                resolve(res);
-            }).catch(err => {
-                reject(err);
-            })
+                .select('likes')
+                .then(res => {
+                    resolve(res);
+                }).catch(err => {
+                    reject(err);
+                })
         })
     }
 
@@ -147,13 +166,13 @@ export class SnippetController {
         return new Promise((resolve, reject) => {
             SnippetCollection.findByIdAndUpdate(id, {
                 $addToSet: { comments: comment }
-            }, { new: true})
-            .select('comments')
-            .then(res => {
-                resolve(res);
-            }).catch(err => {
-                reject(err);
-            })
+            }, { new: true })
+                .select('comments')
+                .then(res => {
+                    resolve(res);
+                }).catch(err => {
+                    reject(err);
+                })
         })
     }
 
@@ -166,10 +185,10 @@ export class SnippetController {
             }, { new: true })
                 .select('comments')
                 .then(res => {
-                resolve(res);
-            }).catch(err => {
-                reject(err);
-            })
+                    resolve(res);
+                }).catch(err => {
+                    reject(err);
+                })
         })
     }
 
@@ -222,10 +241,11 @@ export class SnippetController {
                             {
                                 $addFields: {
                                     likeCount: { $size: "$likes" },
-                                    commentsCount: { $size: "$comments" }
+                                    commentsCount: { $size: "$comments" },
+                                    code: { $substr: ["$code", 0, AppConfigs.listCodeMaxLength] }, // limiting code length
                                 }
                             },
-                            ...getListQuery(listQuery, appConfigs.defaultQueryLimit),
+                            ...getListQuery(listQuery, AppConfigs.defaultQueryLimit),
                             {
                                 $project: {
                                     isDeleted: 0,
@@ -274,12 +294,12 @@ export class SnippetController {
     public static updateOne(id: string, snippet: TSnippet) {
         return new Promise((resolve, reject) => {
             SnippetCollection.findByIdAndUpdate(id, snippet, { new: true })
-            .select('-comments -likes')
-            .then(res => {
-                resolve(res);
-            }).catch(err => {
-                reject(err);
-            });
+                .select('-comments -likes')
+                .then(res => {
+                    resolve(res);
+                }).catch(err => {
+                    reject(err);
+                });
         });
     }
 
