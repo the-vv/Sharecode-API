@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.get('/my-snippets', async (req, res) => {
     if (!res.locals?.currentUser?.id) {
-        return res.status(400).json(appErrorJson(AppStrings.unauthorizedAccess));
+        return res.status(401).json(appErrorJson(AppStrings.unauthorizedAccess));
     }
     const userId = res.locals.currentUser.id;
     const body = ListSchema.parse(req.query);
@@ -80,6 +80,11 @@ router.patch('/:id/copies', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     if (!AppConfigs.mongoDBIdRegexp.test(req.params.id)) {
         return res.status(400).json(appErrorJson('id is invalid'));
+    }
+    // check if user is authorized to delete
+    const targetSnippet = await SnippetController.getById(req.params.id);
+    if (!targetSnippet || targetSnippet.createdBy !== res.locals.currentUser.id) {
+        return res.status(401).json(appErrorJson(AppStrings.unauthorizedAccess));
     }
     // const snippet = await SnippetController.softDeleteById(req.params.id);
     const snippet = await SnippetController.hardDeleteById(req.params.id);

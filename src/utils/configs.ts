@@ -7,5 +7,5 @@ export const AppConfigs = {
     codeMaxLengthPro: 100000,
     mongoDBIdRegexp: /^[0-9a-fA-F]{24}$/,
     defaultQueryLimit: 20,
-    listCodeMaxLength: 300,
+    listCodeMaxLength: 500,
 } as const
