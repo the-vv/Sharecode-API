@@ -233,7 +233,7 @@ export class SnippetController {
                 {
                     $match: {
                         $and: [
-                            { isDeleted: false },
+                            { isDeleted: false, isPublic: true },
                             ...searchQuery
                         ]
                     }
