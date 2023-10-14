@@ -76,7 +76,18 @@ export class SnippetController {
                                 $addFields: {
                                     likeCount: { $size: "$likes" },
                                     commentsCount: { $size: "$comments" },
-                                    code: { $substr: ["$code", 0, AppConfigs.listCodeMaxLength] }, // limiting code length
+                                    code: {
+                                        $cond: [
+                                            { $gte: [{ $strLenCP: "$code" }, AppConfigs.listCodeMaxLength] },
+                                            {
+                                                $concat: [
+                                                    { $substrCP: ["$code", 0, AppConfigs.listCodeMaxLength] },
+                                                    "\n\n(TRUNCATED: Please COPY or OPEN for full code)"
+                                                ]
+                                            },
+                                            "$code"
+                                        ]
+                                    }, // limiting code length
                                 }
                             },
                             ...getListQuery(listQuery, AppConfigs.defaultQueryLimit),
@@ -87,12 +98,7 @@ export class SnippetController {
                                     likes: 0,
                                     comments: 0
                                 }
-                            },
-                            // {
-                            //     $project: {
-                            //         code: { $substr: ["$code", 0, 2] },
-                            //     }
-                            // }
+                            }
                         ],
                         totalItems: [
                             { $count: 'count' } // Count the total number of documents
@@ -242,7 +248,18 @@ export class SnippetController {
                                 $addFields: {
                                     likeCount: { $size: "$likes" },
                                     commentsCount: { $size: "$comments" },
-                                    code: { $substr: ["$code", 0, AppConfigs.listCodeMaxLength] }, // limiting code length
+                                    code: {
+                                        $cond: [
+                                            { $gte: [{ $strLenCP: "$code" }, AppConfigs.listCodeMaxLength] },
+                                            {
+                                                $concat: [
+                                                    { $substrCP: ["$code", 0, AppConfigs.listCodeMaxLength] },
+                                                    "\n\n(TRUNCATED: Please COPY or OPEN for full code)"
+                                                ]
+                                            },
+                                            "$code"
+                                        ]
+                                    }, // limiting code length
                                 }
                             },
                             ...getListQuery(listQuery, AppConfigs.defaultQueryLimit),
@@ -274,7 +291,7 @@ export class SnippetController {
             if (listQuery?.sort) query.sort({ [listQuery.sort]: listQuery.order || 'asc' });
             query.exec()
                 .then(res => {
-                    resolve(res);
+                    resolve(res[0]);
                 }).catch(err => {
                     reject(err);
                 })
