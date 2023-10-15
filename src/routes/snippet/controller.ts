@@ -5,6 +5,7 @@ import { AppStrings } from "@/utils/strings";
 import { IListResponse } from '../../interfaces/common';
 import { getListQuery } from '../../utils/helper-functions';
 import { AppConfigs } from "@/utils/configs";
+import { ECollections } from "@/enums/collections";
 
 export class SnippetController {
 
@@ -106,17 +107,27 @@ export class SnippetController {
                     }
                 },
                 {
+                    $unwind: {
+                        path: '$totalItems',
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
                     $project: {
-                        totalItems: {
-                            $arrayElemAt: ['$totalItems.count', 0]
-                        },
+                        totalItems: '$totalItems.count',
                         result: "$result"
                     }
                 }
             ])
             query.exec()
-                .then((res: IListResponse<TSnippet>[]) => {
-                    resolve(res[0]);
+                .then((res) => {
+                    res[0].totalItems = res[0].totalItems || 0;
+                    SnippetCollection.populate(res[0].result, { path: 'createdBy', model: ECollections.user })
+                        .then((result) => {
+                            resolve({ ...res[0], result });
+                        }).catch(err => {
+                            reject(err);
+                        })
                 }).catch((err: any) => {
                     reject(err);
                 })
@@ -270,7 +281,7 @@ export class SnippetController {
                                     likes: 0,
                                     comments: 0
                                 }
-                            },
+                            }
                         ],
                         totalItems: [
                             { $count: 'count' } // Count the total number of documents
@@ -278,20 +289,27 @@ export class SnippetController {
                     }
                 },
                 {
+                    $unwind: {
+                        path: '$totalItems',
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
                     $project: {
-                        totalItems: {
-                            $arrayElemAt: ['$totalItems.count', 0]
-                        },
+                        totalItems: '$totalItems.count',
                         result: "$result"
                     }
                 }
             ])
-            if (listQuery?.skip && listQuery.skip > 0) query.skip(listQuery.skip);
-            if (listQuery?.limit && listQuery.limit > 0) query.limit(listQuery.limit);
-            if (listQuery?.sort) query.sort({ [listQuery.sort]: listQuery.order || 'asc' });
             query.exec()
                 .then(res => {
-                    resolve(res[0]);
+                    res[0].totalItems = res[0].totalItems || 0;
+                    SnippetCollection.populate(res[0].result, { path: 'createdBy', model: ECollections.user })
+                        .then((result) => {
+                            resolve({ ...res[0], result });
+                        }).catch(err => {
+                            reject(err);
+                        })
                 }).catch(err => {
                     reject(err);
                 })

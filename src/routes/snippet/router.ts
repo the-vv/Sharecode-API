@@ -91,13 +91,13 @@ router.delete('/:id', async (req, res) => {
     res.json(snippet);
 })
 
-router.delete('/:id/force', async (req, res) => {
-    if (!AppConfigs.mongoDBIdRegexp.test(req.params.id)) {
-        return res.status(400).json(appErrorJson('id is invalid'));
-    }
-    const snippet = await SnippetController.hardDeleteById(req.params.id);
-    res.json(snippet);
-})
+// router.delete('/:id/force', async (req, res) => {
+//     if (!AppConfigs.mongoDBIdRegexp.test(req.params.id)) {
+//         return res.status(400).json(appErrorJson('id is invalid'));
+//     }
+//     const snippet = await SnippetController.hardDeleteById(req.params.id);
+//     res.json(snippet);
+// })
 
 router.delete('/:id/like/:userId', async (req, res) => {
     if (!req.params.userId) {
