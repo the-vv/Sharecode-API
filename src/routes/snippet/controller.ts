@@ -83,12 +83,15 @@ export class SnippetController {
                                             {
                                                 $concat: [
                                                     { $substrCP: ["$code", 0, AppConfigs.listCodeMaxLength] },
-                                                    "\n\n(TRUNCATED: Please COPY or OPEN for full code)"
+                                                    "\n\n(TRUNCATED: Please COPY or OPEN for full code)\n\n"
                                                 ]
                                             },
                                             "$code"
                                         ]
-                                    }, // limiting code length
+                                    },
+                                    selfLiked: {
+                                        $in: [userId, "$likes"]
+                                    }
                                 }
                             },
                             ...getListQuery(listQuery, AppConfigs.defaultQueryLimit),
@@ -156,7 +159,7 @@ export class SnippetController {
             SnippetCollection.findByIdAndUpdate(id, {
                 $addToSet: { likes: userId }
             }, { new: true })
-                .select('likes')
+                .select('-comments -likes -code')
                 .then(res => {
                     resolve(res);
                 }).catch(err => {
@@ -170,7 +173,7 @@ export class SnippetController {
             SnippetCollection.findByIdAndUpdate(id, {
                 $pull: { likes: userId }
             }, { new: true })
-                .select('likes')
+                .select('-comments -likes -code')
                 .then(res => {
                     resolve(res);
                 }).catch(err => {
@@ -184,7 +187,7 @@ export class SnippetController {
             SnippetCollection.findByIdAndUpdate(id, {
                 $addToSet: { comments: comment }
             }, { new: true })
-                .select('comments')
+                .select('-comments -likes -code')
                 .then(res => {
                     resolve(res);
                 }).catch(err => {
@@ -200,7 +203,7 @@ export class SnippetController {
                     comments: { _id: commentId }
                 }
             }, { new: true })
-                .select('comments')
+                .select('-comments -likes -code')
                 .then(res => {
                     resolve(res);
                 }).catch(err => {
@@ -236,7 +239,7 @@ export class SnippetController {
         })
     }
 
-    public static getTrending(listQuery: TListSchema) {
+    public static getTrending(listQuery: TListSchema, userId: string) {
         return new Promise<TSnippet[] | null>((resolve, reject) => {
             const searchQuery = [];
             if (listQuery?.search) searchQuery.push({ $text: { $search: listQuery.search } });
@@ -265,12 +268,15 @@ export class SnippetController {
                                             {
                                                 $concat: [
                                                     { $substrCP: ["$code", 0, AppConfigs.listCodeMaxLength] },
-                                                    "\n\n(TRUNCATED: Please COPY or OPEN for full code)"
+                                                    "\n\n(TRUNCATED: Please COPY or OPEN for full code)\n\n"
                                                 ]
                                             },
                                             "$code"
                                         ]
                                     }, // limiting code length
+                                    selfLiked: {
+                                        $in: [userId, "$likes"]
+                                    }
                                 }
                             },
                             ...getListQuery(listQuery, AppConfigs.defaultQueryLimit),
@@ -329,7 +335,7 @@ export class SnippetController {
     public static updateOne(id: string, snippet: TSnippet) {
         return new Promise((resolve, reject) => {
             SnippetCollection.findByIdAndUpdate(id, snippet, { new: true })
-                .select('-comments -likes')
+                .select('-comments -likes -code')
                 .then(res => {
                     resolve(res);
                 }).catch(err => {
@@ -340,7 +346,7 @@ export class SnippetController {
 
     public static softDeleteById(id: string) {
         return new Promise((resolve, reject) => {
-            SnippetCollection.findByIdAndUpdate(id, { isDeleted: true }).then(res => {
+            SnippetCollection.findByIdAndUpdate(id, { isDeleted: true }).select('-comments -likes -code').then(res => {
                 resolve(res);
             }).catch(err => {
                 reject(err);
@@ -350,7 +356,7 @@ export class SnippetController {
 
     public static hardDeleteById(id: string) {
         return new Promise((resolve, reject) => {
-            SnippetCollection.findByIdAndDelete(id).then(res => {
+            SnippetCollection.findByIdAndDelete(id).select('-comments -likes -code').then(res => {
                 resolve(res);
             }).catch(err => {
                 reject(err);

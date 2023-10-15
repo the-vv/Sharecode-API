@@ -35,7 +35,7 @@ router.get('/:id/comments', async (req, res) => {
 
 router.get('/trending', async (req, res) => {
     const body = ListSchema.parse(req.params);
-    const trendingSnippets = await SnippetController.getTrending(body);
+    const trendingSnippets = await SnippetController.getTrending(body, res.locals.currentUser?.id);
     res.json(trendingSnippets);
 })
 
@@ -50,29 +50,26 @@ router.post('/', async (req, res) => {
     res.json(snippet);
 })
 
-router.put('/:id/comment', async (req, res) => {
+router.post('/:id/comment', async (req, res) => {
     const body = CommentsSchema.parse(req.body);
     const snippet = await SnippetController.addComment(req.params.id, body);
     res.json(snippet);
 })
 
-router.put('/:id/like', async (req, res) => {
-    if (!req.body.userId) {
-        return res.status(400).json(appErrorJson('userId is required'));
-    }
-    if (!AppConfigs.mongoDBIdRegexp.test(req.body.userId)) {
-        return res.status(400).json(appErrorJson('userId is invalid'));
-    }
-    const snippet = await SnippetController.addLike(req.params.id, req.body.userId);
+router.post('/:id/like', async (req, res) => {
+    // TODO: implement rate limiting
+    const snippet = await SnippetController.addLike(req.params.id, res.locals.currentUser.id);
     res.json(snippet);
 })
 
 router.patch('/:id/views', async (req, res) => {
+    // TODO: implement rate limiting
     const snippet = await SnippetController.incrementViewCopy(req.params.id, false);
     res.json(snippet);
 })
 
 router.patch('/:id/copies', async (req, res) => {
+    // TODO: implement rate limiting
     const snippet = await SnippetController.incrementViewCopy(req.params.id, true);
     res.json(snippet);
 })
